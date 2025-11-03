@@ -1,9 +1,9 @@
 import express from 'express';
-import envs from './config/envs.js';
+import envs from './config/envs.config.js';
 import { engine } from 'express-handlebars';
 import { join, __dirname } from "./utils/index.js";
 import cookieParser from 'cookie-parser';
-import { connectDb } from './config/db.js';
+import { connectDb } from './config/db.config.js';
 
 // settings
 const app = express();
