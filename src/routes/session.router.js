@@ -7,7 +7,16 @@ const router = Router();
 
 // registro de usuarios con la estrategia 'register' de passport
 router.post('/register', passport.authenticate('register', {failureRedirect: '/api/sessions/failregister', session: false}), async (req, res) => {
+    
+    // respuesta en handlebars
     res.redirect('/login');
+
+    // respuesta en json
+    // req.user contiene el usuario registrado
+    /*res.status(201).json({
+        status: "success",
+        user: req.user
+    });*/
 })
 
 // ruta para manejar fallos en el registro
@@ -27,16 +36,21 @@ router.post('/login', passport.authenticate('login', {failureRedirect: '/api/ses
         email: req.user.email,
         role: req.user.role
     };
-    // Genera el token JWT
-    const token = generateToken(userPayload);
-
-    // Guarda el token en una cookie httpOnly
-    res.cookie('authCookie', token, { maxAge: 3600000, httpOnly: true });
-
-    console.log("Sesión inciada con éxito");
+    
+    const token = generateToken(userPayload);   // Genera el token JWT
+    res.cookie('authCookie', token, { maxAge: 3600000, httpOnly: true });   // Guarda el token en una cookie httpOnly
 
     // Redirige al perfil del usuario
+    console.log("Sesión inciada con éxito");
     res.redirect('/profile');
+
+    // Respuesta en json
+    /*res.status(200).json({
+        status: "success",
+        message: "Login exitoso",
+        token, // puedes enviar el token si el frontend lo necesita
+        user: userPayload
+    })*/
 })
 
 // ruta para manejar fallos en el login
