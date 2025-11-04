@@ -64,7 +64,7 @@ const initializePassport = () => {
     }
     ));
 
-    // estrategia JWT
+    // estrategia JWT para proteger rutas y extraer el usuario a partir del token
     passport.use('jwt', new JWTStrategy({
         jwtFromRequest: ExtractJWT.fromExtractors([cookieExtractor]),   // extraemos el token desde la cookie
         secretOrKey: envs.jwt_secret
@@ -79,7 +79,7 @@ const initializePassport = () => {
     }
     ));
 
-    // serialización y deserialización
+    // esta comentado porque no usamos sesiones con passport
     /*passport.serializeUser((user, done) => {
         done(null, user._id);
     });
@@ -89,6 +89,7 @@ const initializePassport = () => {
     })*/
 }
 
+// función para extraer el token JWT desde la cookie
 const cookieExtractor = (req) => {
     let token = null
     if(req && req.cookies) {

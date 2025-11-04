@@ -46,4 +46,9 @@ router.get('/faillogin', (req, res) => {
         .json({ status: "error", message: "Error al iniciar sesion" });
 });
 
+// current => ruta para validar al usuario logueado y devolver en una respuesta sus datos
+router.get('/current', passport.authenticate('jwt', { session: false}), (req, res) => {
+    res.json({ status: "success", user: req.user });
+})
+
 export default router;
