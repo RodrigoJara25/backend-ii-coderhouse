@@ -12,6 +12,16 @@ export default class User {
         }
     }
 
+    getUserById = async (id) => {
+        try {
+            const user = await userModel.findById(id).lean();
+            return user || null;
+        } catch (error) {
+            console.error(`Error fetching user with ID ${id}:`, error.message);
+            return null;
+        }
+    }
+
     getUserByEmail = async (email) => {
         try {
             const user = await userModel.findOne({ email: email }).lean();
@@ -39,6 +49,16 @@ export default class User {
             return updatedUser;
         } catch (error) {
             console.error(`Error updating user with ID ${userId}:`, error.message);
+            return null;
+        }
+    }
+
+    deleteUser = async (id) => {
+        try {
+            const deleted = await userModel.findByIdAndDelete(id).lean();
+            return deleted || null;
+        } catch (error) {
+            console.error(`Error deleting user with ID ${id}:`, error.message);
             return null;
         }
     }

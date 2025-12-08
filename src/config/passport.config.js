@@ -1,53 +1,64 @@
 import passport from "passport";
 import local from "passport-local";
 import jwt from "passport-jwt";
-import userModel from "../models/user.model.js";
-import { createHash, generateToken, isValidPassword } from "../utils/index.js";
+
 import envs from "../config/envs.config.js";
+
+import AuthService from "../services/auth.service.js";
+
+const authService = new AuthService();
 
 // Estrategias
 const JWTStrategy = jwt.Strategy;
 const ExtractJWT = jwt.ExtractJwt;
 const LocalStrategy = local.Strategy;
 
+// función para extraer el token JWT desde la cookie
+const cookieExtractor = (req) => {
+    let token = null
+    if(req && req.cookies) {
+        token = req.cookies['authCookie']
+    }
+    return token
+}
+
 // 
 const initializePassport = () => {
 
-    // estrategia local para registro
+    // estrategia local para registro (delegada a AuthService)
     passport.use('register', new LocalStrategy({
         passReqToCallback: true,
         usernameField: 'email'
     },
     async (req, username, password, done) => {
-        const { first_name, last_name, email, age } = req.body;
+        const { first_name, last_name, age } = req.body;    // no se llama al 'email' porque ya lo tenemos en 'username'
         try {
-            const userFound = await userModel.findOne({ email: username });
-            if (userFound) {
-                console.log("El usuario ya existe");
-                return done(null, false);
-            }
-            const newUser = {
+            const user = await authService.register({
                 first_name,
                 last_name,
-                email,
+                email: username,
                 age,
-                password: createHash(password)
-            };
-            const createdUser = await userModel.create(newUser);
-            return done(null, createdUser);
+                password
+            });
+            if (!user) return done(null, false);
+            return done(null, user);
         } catch (error) {
             return done("Error al registrar el usuario " + error, false);
         }
     }
     ));
 
-    // estrategia local para login
+    // estrategia local para login (delegada a AuthService)
     passport.use('login', new LocalStrategy({
         usernameField: 'email'
     },
     async (username, password, done) => {
         try {
-            const userExist = await userModel.findOne({ email: username });
+            const result = await authService.login(username, password);
+            if (!result) return done(null, false); // usuario inexistente o contraseña inválida
+            // Pasamos el usuario autenticado; el token se genera en la ruta /login
+            return done(null, result.user);
+            /*const userExist = await userModel.findOne({ email: username });
             console.log(userExist);
             if (!userExist) return done(null, false);   // no existe el usuario
 
@@ -56,8 +67,7 @@ const initializePassport = () => {
             if (!isValid) return done(null, false);     // password incorrecto
 
             // Si todo está bien, retorna el usuario
-            return done(null, userExist);
-
+            return done(null, userExist);*/
         } catch (error) {
             return done("Error al iniciar sesión " + error, false);
         }
@@ -87,15 +97,6 @@ const initializePassport = () => {
         const user = await userModel.findById(id);
         done(null, user);
     })*/
-}
-
-// función para extraer el token JWT desde la cookie
-const cookieExtractor = (req) => {
-    let token = null
-    if(req && req.cookies) {
-        token = req.cookies['authCookie']
-    }
-    return token
 }
 
 export default initializePassport;
