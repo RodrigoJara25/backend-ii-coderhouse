@@ -19,7 +19,7 @@ export default class AuthService {
     async login(email, password) {
         const user = await userService.getByEmail(email);
         if (!user) return null;
-        const ok = isValidPassword(user.password, password);
+        const ok = isValidPassword(password, user.password);
         if (!ok) return null;
         const payload = { id: user._id, first_name: user.first_name, last_name: user.last_name, email: user.email, role: user.role };
         const token = generateToken(payload);
