@@ -34,4 +34,29 @@ router.post("/",
     } 
 )
 
-// 
+// actualizar (solo ADMIN)
+router.put("/:pid", 
+    passport.authenticate("jwt", {session: false}), 
+    authorizeRole("admin"),
+    async (req, res) => {
+        const { pid } = req.params;
+        const updateData = req.body;
+        const updatedProduct = await productService.update(pid, updateData);
+        res
+            .status(200)
+            .json({ status: "success", payload: updatedProduct });
+    }
+)
+
+// eliminar (solo ADMIN)
+router.delete("/:pid", 
+    passport.authenticate("jwt", {session: false}), 
+    authorizeRole("admin"),
+    async (req, res) => {
+        const { pid } = req.params;
+        const deletedProduct = await productService.delete(pid);
+        res
+            .status(200)
+            .json({ status: "success", payload: deletedProduct });
+    }
+)
