@@ -1,18 +1,29 @@
 import jwt from "jsonwebtoken";
-import envs from "../config/envs.config";
+import envs from "../config/envs.config.js";
 
 // Middleware para autorizar roles usando Passport.js
+// export const authorizeRole = (...allowedRoles) => {
+//     return (req, res, next) => {
+//         const role = req.user?.role; // viene de passport.authenticate('jwt')
+//         if (!role) return res.status(401).json({ status: "error", message: "No autenticado" });
+//         const ok = allowedRoles.map(
+//             r => r.toLowerCase()).includes(role.toLowerCase()
+//         );
+//         if (!ok) return res.status(403).json({ status: "error", message: "No tienes permisos para realizar esta acción" });
+//         next();
+//     };
+// };
+
 export const authorizeRole = (...allowedRoles) => {
     return (req, res, next) => {
-        const role = req.user?.role; // viene de passport.authenticate('jwt')
+        const payload = req.user || {};
+        const role = payload.role ?? payload.user?.role; // soporta payload anidado
         if (!role) return res.status(401).json({ status: "error", message: "No autenticado" });
-        const ok = allowedRoles.map(
-            r => r.toLowerCase()).includes(role.toLowerCase()
-        );
+        const ok = allowedRoles.map(r => r.toLowerCase()).includes(role.toLowerCase());
         if (!ok) return res.status(403).json({ status: "error", message: "No tienes permisos para realizar esta acción" });
         next();
     };
-};
+  };
 
 // Middleware para autorizar roles usando header Authorization con JWT
 export const handlePolicies = (policies) => (req, res, next) => {

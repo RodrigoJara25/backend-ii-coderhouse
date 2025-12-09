@@ -2,8 +2,10 @@ import { Router } from "express";
 import passport from "passport";
 
 import { generateToken } from "../utils/index.js";
+import CartService from "../services/cart.service.js";
 
 const router = Router();
+const cartService = new CartService();
 
 // registro de usuarios con la estrategia 'register' de passport
 router.post('/register', passport.authenticate('register', {failureRedirect: '/api/sessions/failregister', session: false}), async (req, res) => {
@@ -28,6 +30,9 @@ router.get('/failregister', (req, res) => {
 
 // login de usuarios con la estrategia 'login' de passport
 router.post('/login', passport.authenticate('login', {failureRedirect: '/api/sessions/faillogin', session: false}), async (req, res) => {
+    const userId = req.user._id.toString();
+    await cartService.ensureUserCart(userId);
+
     // req.user contiene el usuario autenticado
     const userPayload = {
         id: req.user._id,

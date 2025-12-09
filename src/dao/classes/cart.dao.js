@@ -1,4 +1,5 @@
 import cartModel from "../models/cart.model.js";
+import productModel from "../models/product.model.js";
 
 export default class CartDAO {
     getCarts = async () => {
@@ -47,6 +48,32 @@ export default class CartDAO {
             return updated || null;
         } catch (error) {
             console.error(`Error updating cart with ID ${id}:`, error.message);
+            return null;
+        }
+    }
+
+    addProductToCart = async (cartId, productId, quantity) => {
+        try {
+            const product = await productModel.findById(productId).lean();
+            if (!product) {
+                console.error("Producto no encontrado")
+                return null;
+            }
+            const cart = await cartModel.findById(cartId);
+            if (!cart) {
+                console.error("Carrito no encontrado")
+                return null;
+            }
+            const existingProductIndex = cart.products.findIndex(p => p.product.toString() === productId);  // Comparar como strings
+            if (existingProductIndex !== -1) {
+                cart.products[existingProductIndex].quantity += quantity;
+            } else {
+                cart.products.push({ product: productId, quantity });
+            }
+            const saved = await cart.save();
+            return saved.toObject();
+        } catch (error) {
+            console.error(`Error adding product to cart with ID ${cartId}:`, error.message);
             return null;
         }
     }

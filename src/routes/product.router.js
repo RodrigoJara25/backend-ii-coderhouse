@@ -60,3 +60,5 @@ router.delete("/:pid",
             .json({ status: "success", payload: deletedProduct });
     }
 )
+
+export default router;

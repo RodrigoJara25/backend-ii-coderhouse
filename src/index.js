@@ -6,9 +6,12 @@ import cookieParser from 'cookie-parser';
 import passport from 'passport';
 
 import { connectDb } from './config/db.config.js';
+import initializePassport from './config/passport.config.js';
+
 import authRouter from "./routes/session.router.js";
 import viewsRouter from "./routes/views.router.js";
-import initializePassport from './config/passport.config.js';
+import productRouter from "./routes/product.router.js";
+import cartRouter from "./routes/cart.router.js";
 
 // settings
 const app = express();
@@ -36,6 +39,8 @@ app.get("/", (req, res) => {
     res.render("home");
 })
 
+app.use("/api/products", productRouter);
+app.use("/api/carts", cartRouter);
 app.use("/api/sessions", authRouter);
 app.use("/", viewsRouter);
 

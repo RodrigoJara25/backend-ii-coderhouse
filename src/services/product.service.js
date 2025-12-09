@@ -11,7 +11,9 @@ export default class ProductService {
     }
 
     async getById(id) {
-        return await productRepository.getById(id);
+        const product = await productRepository.getById(id);
+        if (!product) throw new Error("Producto no encontrado");
+        return product;
     }
 
     async update(id, data) {
